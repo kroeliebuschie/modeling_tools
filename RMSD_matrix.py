@@ -12,26 +12,14 @@ import sys, time, os
 import pymol
 pymol.finish_launching()
 
-
-#initiate list
-PDBlist = []
-
-
-with open('NR_complexes.csv', 'rU') as csvfile1:
-    csvreader1 = csv.reader(csvfile1, dialect='excel')   #the file is made in excel so it has to be opened this way
-    
-    # this loop will get the sequence information of every row in the CSV file
-    # These sequences are from the peptides which have to be modelled, they will 
-    # be refered to as query the rest of the document
-    next(csvreader1)                                   #skip the header, it conains no info
-    for row1 in csvreader1:
-	if row1[1] != "":
-	    #structuur 
-            chain = re.split('\W+', row1[2])[0]
-            PDB = row1[1] 
-            extrName = PDB + "_" + chain
-	    PDBlist.append((PDB, chain, extrName, row1[0]))
-
+PDBlist.append((PDB, chain, extrName, row1[0]))
+class StructureTable(object):
+    """creates a table of PDBnames and their chains which have to be aligned"""
+    items = {}
+    pymol.cmd.set("fetch_path", "/Volumes/Home/Users/mehdi/Downloads/peptides_modeling/PDB_for_modelling/NR")
+    def __init__(self, pdb_list):
+        """list the content of the file"""
+        self.pdb_list = pdb_list
 
 pymol.cmd.set("fetch_path", "/Volumes/Home/Users/mehdi/Downloads/peptides_modeling/PDB_for_modelling/NR")
 rmsd_matrix = []
@@ -39,11 +27,11 @@ for item1 in PDBlist:
     pymol.cmd.fetch(item1[0], path='PDB_for_modelling/NR')
     rmsd_row = []
     for item2 in PDBlist:
-	pymol.cmd.fetch(item2[0], path='PDB_for_modelling/NR')
-	selection1 = item1[0] + " and chain " + item1[1]
-	selection2 = item2[0] + " and chain " + item2[1]
+        pymol.cmd.fetch(item2[0], path='PDB_for_modelling/NR')
+        selection1 = item1[0] + " and chain " + item1[1]
+        selection2 = item2[0] + " and chain " + item2[1]
         pymol.cmd.extract(item1[2], selection1)
-	pymol.cmd.extract(item2[2], selection2)
+        pymol.cmd.extract(item2[2], selection2)
         test = pymol.cmd.align(item1[2], item2[2])
 	#print item1[3], item2[3]
 	rmsd_row.append(test[0])
